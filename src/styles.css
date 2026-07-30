@@ -1,0 +1,883 @@
+:root {
+  /* AMOLED / true-dark: pure-black base so unlit pixels stay off in the booth. */
+  --bg: #000000;
+  --bg-2: #08090b;
+  --bg-3: #15171c;
+  --border: #23262d;
+  --text: #e6edf3;
+  --muted: #7c8797;
+  --accent: #4f8cff;
+  --accent-2: #2ea043;
+  --danger: #e5534b;
+  --warn: #d29922;
+  --note: #ffd43b;
+  --song: #b47aff;
+  --radius: 8px;
+  --mono: ui-monospace, "Cascadia Code", "Consolas", monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+}
+button:hover { border-color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border); }
+.btn-sm { padding: 3px 8px; font-size: 12px; }
+/* Anchors styled as buttons (e.g. the JSON export download link). */
+a.btn-sm, a.btn-primary {
+  display: inline-block; text-decoration: none;
+  border: 1px solid var(--border); background: var(--bg-3);
+  color: var(--text); border-radius: var(--radius);
+}
+a.btn-sm:hover, a.btn-primary:hover { border-color: var(--accent); }
+
+input, select, textarea {
+  font: inherit;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+textarea { width: 100%; resize: vertical; font-family: var(--mono); }
+
+.muted { color: var(--muted); }
+.row { display: flex; gap: 8px; align-items: center; }
+.wrap { flex-wrap: wrap; }
+.spacer { flex: 1; }
+.hint { font-size: 12px; color: var(--muted); }
+
+/* Layout */
+.app { display: flex; flex-direction: column; height: 100vh; }
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 16px; background: var(--bg-2); border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; letter-spacing: 0.5px; }
+.brand span { color: var(--accent); }
+.tabs { display: flex; gap: 4px; }
+.tab { background: transparent; border: 1px solid transparent; color: var(--muted); }
+.tab.active { color: var(--text); border-color: var(--border); background: var(--bg-3); }
+.view { flex: 1; overflow: auto; padding: 16px; }
+
+.panel {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
+}
+.panel-title { font-weight: 600; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+
+/* Characters */
+.chars { display: flex; flex-wrap: wrap; gap: 8px; }
+.char-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--bg-3);
+}
+.swatch {
+  width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
+  cursor: pointer; flex: none;
+}
+
+/* Color picker popover */
+.color-pop {
+  position: absolute; z-index: 20; margin-top: 4px;
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px; width: 200px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-bottom: 8px; }
+.swatch-btn { width: 20px; height: 20px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); padding: 0; }
+
+/* Script editor */
+.line-row {
+  display: grid;
+  grid-template-columns: 90px 130px 1fr auto;
+  gap: 8px; align-items: start;
+  padding: 6px 8px; border-radius: 6px; border-left: 4px solid transparent;
+  margin-bottom: 4px;
+}
+.line-row.type-act, .line-row.type-scene { font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.line-row.type-stage_dir { font-style: italic; color: var(--muted); }
+.line-row.type-song {
+  background: rgba(180, 122, 255, 0.14);
+  border-left-color: var(--song);
+  font-weight: 700;
+}
+/* Pause / break events: amber, analogous to the song violet. */
+.line-row.type-pause {
+  background: rgba(210, 153, 34, 0.14);
+  border-left-color: var(--warn);
+  font-weight: 700;
+}
+.line-text-input { width: 100%; }
+.line-controls { display: flex; gap: 4px; align-items: center; }
+.cue-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.cue-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 12px;
+  background: var(--bg); border: 1px solid var(--accent); color: var(--text);
+  padding: 2px 6px; border-radius: 4px;
+}
+.cue-chip .x { color: var(--muted); cursor: pointer; }
+.cue-chip .x:hover { color: var(--danger); }
+/* Department-colored cue chips (script/song editors) — match the dept color
+   language used by the sheet chips and show-mode pills. */
+.cue-chip.dept-lights { border-color: var(--accent);   color: var(--accent);   background: rgba(79, 140, 255, 0.10); }
+.cue-chip.dept-audio  { border-color: var(--accent-2); color: var(--accent-2); background: rgba(46, 160, 67, 0.10); }
+.cue-chip.dept-spot   { border-color: var(--warn);     color: var(--warn);     background: rgba(210, 153, 34, 0.10); }
+.note-line { margin-top: 4px; }
+.note-line input { width: 100%; }
+.lyrics-input { font-size: 12px; line-height: 1.4; }
+
+/* Songs */
+.song-block { margin: 4px 0 8px 98px; border-left: 2px dashed var(--border); padding-left: 12px; }
+.section-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 4px 0; }
+
+/* Loop sections (A/B flares). The toggle lights amber when on; the marker is a
+   small repeat glyph so a loop section is spottable at a glance. */
+.loop-toggle.on {
+  background: rgba(210, 153, 34, 0.16);
+  border-color: var(--warn);
+  color: var(--warn);
+  font-weight: 700;
+}
+.loop-marker { color: var(--warn); font-size: 13px; line-height: 1; align-self: center; }
+
+/* Cue sheet */
+.cue-table { width: 100%; border-collapse: collapse; }
+.cue-table th, .cue-table td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.cue-table th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+.cue-num { font-family: var(--mono); font-weight: 700; }
+.pill { font-size: 11px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+/* Show mode */
+.show { display: grid; grid-template-columns: 1fr 360px; height: 100%; }
+.show-script { overflow: auto; padding: 0 24px 24px; font-size: 20px; line-height: 1.6; }
+.show-line {
+  display: flex; align-items: baseline; gap: 16px;
+  padding: 8px 14px; border-left: 5px solid transparent; border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.show-line:hover { background: rgba(255, 255, 255, 0.03); }
+/* Lines above the playhead are dimmed so the operator's eye lands on the
+   current line and what's ahead. Hovering a past line restores it for read-back. */
+.show-line.past { opacity: 0.45; }
+.show-line.past:hover { opacity: 1; }
+.show-line-main { flex: 1; min-width: 0; }
+
+/* Scene header — sticky bar at the top of the scrolling script column showing
+   the current act/scene/pause. Clicking it opens a jump menu. .show-script has
+   no top padding, so the bar sticks flush at top: 0 (no see-through strip); the
+   negative horizontal margins cancel the column's side padding so the bar spans
+   the full width edge-to-edge. */
+.scene-head {
+  position: sticky; top: 0; z-index: 30;
+  margin: 0 -24px 12px; padding: 0;
+}
+.scene-head-bar {
+  display: flex; align-items: baseline; gap: 12px; width: 100%;
+  padding: 10px 24px; text-align: left;
+  background: var(--bg-2); border: none; border-bottom: 1px solid var(--border);
+  border-radius: 0; color: var(--text);
+}
+.scene-head-bar:hover:not(:disabled) { background: var(--bg-3); border-color: var(--border); }
+.scene-head-bar:disabled { cursor: default; color: var(--muted); }
+.scene-head-bar.open { background: var(--bg-3); }
+.scene-head-eyebrow {
+  flex: none; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 1px; font-size: 11px; font-weight: 600;
+}
+.scene-head-title {
+  flex: 1; min-width: 0; font-size: 16px; font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.scene-head-title.type-act, .scene-head-title.type-scene {
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.scene-head-title.type-pause { color: var(--warn); }
+.scene-head-caret { flex: none; color: var(--muted); font-size: 12px; }
+/* Per-device stage-dir visibility toggle, floating on the sticky scene bar. */
+.sd-toggle {
+  position: absolute; right: 44px; top: 50%; transform: translateY(-50%); z-index: 31;
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--muted);
+}
+.sd-toggle:hover { color: var(--text); }
+.sd-toggle.on { color: var(--warn); border-color: var(--warn); }
+
+.scene-menu {
+  position: absolute; left: 24px; right: 24px; top: 100%;
+  max-height: 50vh; overflow: auto;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  padding: 4px;
+}
+.scene-menu-item {
+  display: flex; align-items: baseline; gap: 10px; width: 100%;
+  padding: 8px 10px; text-align: left; border: 1px solid transparent;
+  background: transparent; color: var(--text); border-radius: 6px;
+  font-size: 14px;
+}
+.scene-menu-item:hover { background: var(--bg-3); border-color: var(--border); }
+.scene-menu-item.active { border-color: var(--accent); background: rgba(79,140,255,0.10); }
+.scene-menu-kind {
+  flex: none; width: 52px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; font-weight: 700;
+}
+.scene-menu-item.type-act .scene-menu-kind,
+.scene-menu-item.type-scene .scene-menu-kind { color: var(--accent); }
+.scene-menu-item.type-pause .scene-menu-kind { color: var(--warn); }
+.scene-menu-text {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.scene-menu-item.type-act .scene-menu-text,
+.scene-menu-item.type-scene .scene-menu-text {
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.scene-menu-item.type-pause .scene-menu-text { color: var(--warn); font-weight: 600; }
+
+/* Per-type styling. Kept BEFORE .current so the current-line wash (equal
+   specificity, later in source) always wins on top of type styling. */
+.show-line.type-stage_dir { font-style: italic; color: var(--muted); }
+.show-line.type-act,
+.show-line.type-scene {
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; font-size: 1.05em;
+}
+/* Songs: violet border + tint + bold, slightly larger — clearly a song. */
+.show-line.type-song {
+  background: rgba(180, 122, 255, 0.16);
+  border-left-color: var(--song);
+  font-weight: 700; font-size: 1.08em;
+}
+/* Pause / break events: amber, analogous to the song violet. */
+.show-line.type-pause {
+  background: rgba(210, 153, 34, 0.16);
+  border-left-color: var(--warn);
+  font-weight: 700; font-size: 1.08em;
+}
+/* Song sections sit lighter than the song header line. */
+.show-line.show-section {
+  background: rgba(180, 122, 255, 0.09);
+  border-left-color: var(--song);
+  font-weight: 600; font-size: 1em;
+}
+/* Pause sections sit lighter than the pause header line (amber). Placed after
+   .show-section so it overrides the violet for pause containers. Excludes
+   .current via :not() so the current-line wash below (which is only 2 classes)
+   is never outranked by this 3-class rule on the live line. */
+.show-line.type-pause.show-section:not(.current) {
+  background: rgba(210, 153, 34, 0.09);
+  border-left-color: var(--warn);
+}
+
+.show-line.current {
+  background: rgba(255, 255, 255, 0.10);
+  border-left-color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.30);
+}
+/* The current line's border inherits the line's identity color when it has
+   one — white is only the fallback for plain colorless lines. (Speaker-colored
+   lines inherit via the inline style in ShowMode.) The wash + ring above stay
+   neutral so "current" always reads the same. */
+.show-line.current.type-stage_dir { border-left-color: var(--muted); }
+.show-line.current.type-song,
+.show-line.current.show-section { border-left-color: var(--song); }
+.show-line.current.type-pause,
+.show-line.current.type-pause.show-section { border-left-color: var(--warn); }
+.show-line.current .show-line-main { font-weight: 600; }
+
+/* The ARMED stop — the cue GO will fire next. A dashed green (GO-button)
+   outline plus a small "GO" badge so the operator can find the standby in the
+   script at a glance. Deliberately distinct from the white .current wash and
+   from the type tints/notes: an outline (not a fill) sits on top of any
+   background without fighting the yellow notes or the cue pills. Positioning
+   context for the badge; the badge is absolute so it never disturbs the flex
+   row (note stays at the far right). */
+.show-line.standby-next {
+  position: relative;
+  outline: 1px dashed var(--accent-2);
+  outline-offset: -3px;
+  border-radius: 4px;
+}
+.show-line.standby-next::after {
+  content: "GO";
+  position: absolute;
+  top: 50%; right: 6px; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  color: var(--accent-2);
+  padding: 1px 5px; border-radius: 3px;
+  border: 1px solid var(--accent-2); background: rgba(46, 160, 67, 0.12);
+  pointer-events: none;
+}
+.show-section { margin-left: 24px; }
+/* Notes: prominent, yellow, right-aligned — readable from the booth. */
+.show-note {
+  flex: none; max-width: 46%;
+  text-align: right; color: var(--note);
+  font-size: 1.05em; font-weight: 600; line-height: 1.4;
+  white-space: pre-wrap;
+}
+/* Department-scoped notes (lights vs audio) stack when a caller/viewer sees both. */
+.show-note-item { display: block; }
+.note-dept-tag {
+  display: inline-block; margin-right: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 0 4px; border-radius: 3px;
+  border: 1px solid var(--border); color: var(--muted);
+  vertical-align: middle;
+}
+/* Song-section lyrics under the section label — pre-wrap, smaller & softer than
+   dialogue so they read as sung text, not a cue. Lives in the left main column. */
+.show-lyrics {
+  margin-top: 6px;
+  white-space: pre-wrap;
+  font-size: 0.8em; line-height: 1.4;
+  font-weight: 400; color: var(--muted);
+}
+.standby-note { color: var(--note); font-size: 16px; font-weight: 600; margin-top: 6px; }
+/* Live console mirror ("Ion at Q 1/12") under the standby header. */
+.eos-now {
+  margin-top: 4px; font-size: 12px; color: var(--accent-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.eos-now.down { color: var(--muted); }
+.eos-now .eos-text { color: var(--muted); font-family: var(--mono); }
+.show-side {
+  background: var(--bg-2); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  /* min-height 0 + hidden: without these the panel grows past its grid cell
+     as the log fills, pushing GO off-screen (the log must scroll internally). */
+  min-height: 0; overflow: hidden;
+}
+.standby { padding: 20px; border-bottom: 1px solid var(--border); }
+.standby-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.standby-sub { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
+.standby-cue { font-family: var(--mono); font-size: 28px; font-weight: 700; margin: 6px 0; }
+.standby-msg { font-family: var(--mono); color: var(--accent); font-size: 13px; word-break: break-all; }
+.go-btn {
+  width: 100%; font-size: 32px; font-weight: 800; letter-spacing: 2px;
+  padding: 24px; margin-top: 14px; color: #fff;
+  background: var(--accent-2); border: none; border-radius: var(--radius);
+}
+.go-btn:disabled { background: var(--bg-3); color: var(--muted); }
+.go-btn:not(:disabled):active { transform: scale(0.98); }
+/* Loop GO: amber to signal manual A/B cycling rather than advancing. */
+.go-btn.loop { background: var(--warn); color: #141414; }
+/* Armed cue sits AHEAD of the reading playhead (not on the current line):
+   GO turns blue and the ahead-hint says how far. Declared after .loop so the
+   ahead signal wins when a loop stop is armed further down. */
+.go-btn.ahead { background: var(--accent); color: #fff; }
+/* Anti-skip guard active: the armed cue is far ahead of the reading playhead,
+   so a plain GO is refused. This is NOT the disabled gray — the button stays
+   clickable (Shift+click overrides), so it reads as intentionally LOCKED: a
+   danger-red outline over a dark fill. Declared last so it wins over both the
+   amber loop and the blue ahead treatments when the guard trips. */
+.go-btn.blocked,
+.go-btn.blocked.ahead,
+.go-btn.blocked.loop {
+  background: rgba(229, 83, 75, 0.12);
+  color: var(--danger);
+  outline: 2px solid var(--danger);
+  outline-offset: -2px;
+}
+.go-btn.blocked:not(:disabled):active { transform: scale(0.98); }
+.ahead-hint {
+  margin-top: 12px; text-align: center;
+  color: var(--accent); font-size: 13px; font-weight: 600;
+}
+/* Warning copy that replaces the blue ahead-hint when the guard blocks GO. */
+.ahead-hint.blocked { color: var(--danger); }
+
+/* Loop standby: amber-tinted panel; the whole standby gets an amber accent so
+   the operator instantly reads "you're in a loop, GO won't advance". */
+.standby.loop { background: rgba(210, 153, 34, 0.06); }
+.standby.loop .standby-sub { color: var(--warn); }
+.loop-standby { margin-top: 4px; }
+.loop-next {
+  font-size: 15px; margin: 4px 0 10px;
+  padding: 6px 10px; border-radius: 6px;
+  background: rgba(210, 153, 34, 0.12); border: 1px solid var(--warn);
+}
+.loop-next .loop-pos { color: var(--warn); font-weight: 700; }
+.loop-next .loop-fired { color: var(--muted); }
+.loop-cue { padding: 4px 0; opacity: 0.55; }
+.loop-cue.next { opacity: 1; }
+.exit-loop { border-color: var(--warn); color: var(--warn); }
+.exit-loop:hover { background: var(--warn); color: #141414; border-color: var(--warn); }
+.osc-log { flex: 1; min-height: 0; overflow: auto; padding: 12px; font-family: var(--mono); font-size: 12px; }
+.log-entry { padding: 3px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+.log-entry .tag { font-weight: 700; }
+.log-entry.sent .tag { color: var(--accent-2); }
+.log-entry.stub .tag { color: var(--warn); }
+
+.banner { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+.banner.warn { background: rgba(210,153,34,0.12); border: 1px solid var(--warn); color: #e9c46a; }
+.banner.live { background: rgba(46,160,67,0.12); border: 1px solid var(--accent-2); color: #7ee2a0; }
+
+.empty { text-align: center; color: var(--muted); padding: 60px 20px; }
+
+/* ========================================================================
+   M1 — identity / join / live-sync UI
+   ======================================================================== */
+
+/* --- Join screen --------------------------------------------------------- */
+.join-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: var(--bg);
+}
+.join-card {
+  width: 100%; max-width: 420px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+.join-brand { font-weight: 800; font-size: 26px; letter-spacing: 0.5px; }
+.join-brand span { color: var(--accent); }
+.join-sub { color: var(--muted); margin: 2px 0 20px; }
+.join-notice { margin-bottom: 16px; }
+.join-field { display: block; margin-bottom: 16px; }
+.join-label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.join-field > input, .join-field > select { width: 100%; font-size: 16px; padding: 12px; }
+.join-field .hint { display: block; margin-top: 6px; }
+.join-empty { text-align: center; padding: 12px 0; }
+.join-empty .btn-primary { margin-top: 10px; }
+.join-go { width: 100%; font-size: 17px; padding: 14px; margin-top: 4px; }
+.join-new { width: 100%; margin-top: 10px; }
+.join-err { margin: 4px 0 12px; }
+
+/* Role picker — big touch targets in a 2-col grid. */
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.role-btn {
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  padding: 12px; border: 1px solid var(--border); background: var(--bg-3);
+  border-radius: 8px; min-height: 60px;
+}
+.role-btn.active { border-color: var(--accent); background: rgba(79,140,255,0.12); }
+.role-name { font-weight: 700; font-size: 15px; }
+.role-hint { font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+.spot-stepper { display: inline-flex; align-items: center; gap: 4px; }
+.spot-stepper button { font-size: 20px; width: 44px; height: 44px; padding: 0; }
+.spot-no { font-size: 22px; font-weight: 700; min-width: 40px; text-align: center; font-family: var(--mono); }
+
+/* --- Connection dot / status -------------------------------------------- */
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.dot-online { background: var(--accent-2); box-shadow: 0 0 6px rgba(46,160,67,0.8); }
+.dot-connecting { background: var(--warn); box-shadow: 0 0 6px rgba(210,153,34,0.7); }
+.dot-offline { background: var(--danger); box-shadow: 0 0 6px rgba(229,83,75,0.7); }
+.conn-dot { width: 11px; height: 11px; }
+/* Padded tooltip target around the connection dot (hoverable on touch-ish DPIs). */
+.conn-wrap { display: inline-flex; align-items: center; padding: 6px; margin: -6px; cursor: help; }
+
+/* --- Show timer (topbar) ------------------------------------------------- */
+.show-timer { display: inline-flex; align-items: center; gap: 8px; }
+/* Wall clock (time of day), to the RIGHT of the show clock, same size. */
+.wall-clock {
+  font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.5px; padding-left: 8px; border-left: 1px solid var(--border);
+}
+.timer-clock { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; }
+.timer-clock.running { color: var(--accent-2); }
+.timer-clock.paused { color: var(--warn); }
+.timer-clock.preshow { color: var(--accent); }
+.resume-hint { font-size: 12px; font-weight: 700; color: var(--warn); white-space: nowrap; }
+
+/* --- Ready check (crew-wide bar under the topbar) ------------------------- */
+.ready-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 16px;
+  background: rgba(46, 160, 67, 0.12); border-bottom: 1px solid var(--accent-2);
+}
+.ready-bar.all { background: rgba(46, 160, 67, 0.28); }
+.ready-title { color: var(--accent-2); letter-spacing: 1px; font-size: 13px; }
+.ready-count { font-weight: 700; }
+.ready-waiting {
+  color: var(--muted); font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
+}
+.ready-btn {
+  background: var(--accent-2); border-color: var(--accent-2); color: #fff;
+  font-weight: 800; font-size: 15px; padding: 8px 22px; border-radius: 999px;
+}
+.ready-btn:hover { filter: brightness(1.1); border-color: var(--accent-2); }
+.ready-done { color: var(--accent-2); font-weight: 700; }
+.ready-mark { color: var(--muted); font-weight: 700; }
+.ready-mark.ok { color: var(--accent-2); }
+.timer-start { border-color: var(--accent-2); color: var(--accent-2); }
+.timer-start:hover { background: var(--accent-2); color: #fff; border-color: var(--accent-2); }
+
+/* --- Code alerts --------------------------------------------------------- */
+/* The banner every addressed device shows while a code is active. Yellow =
+   attention, red = emergency (pulses). Sits directly under the topbar. */
+.code-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 16px;
+}
+.code-bar.code-yellow {
+  background: rgba(210, 153, 34, 0.22);
+  border-bottom: 1px solid var(--warn);
+}
+.code-bar.code-red {
+  background: rgba(229, 83, 75, 0.28);
+  border-bottom: 1px solid var(--danger);
+  animation: code-pulse 1.2s ease-in-out infinite;
+}
+@keyframes code-pulse {
+  0%, 100% { background: rgba(229, 83, 75, 0.28); }
+  50% { background: rgba(229, 83, 75, 0.46); }
+}
+.code-title { letter-spacing: 1.5px; font-size: 14px; white-space: nowrap; }
+.code-bar.code-yellow .code-title { color: var(--warn); }
+.code-bar.code-red .code-title { color: #ff8d86; }
+.code-msg {
+  font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.code-meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.code-clear {
+  background: transparent; font-weight: 800; font-size: 13px;
+  padding: 6px 16px; border-radius: 999px; white-space: nowrap;
+}
+.code-bar.code-yellow .code-clear { border-color: var(--warn); color: var(--warn); }
+.code-bar.code-yellow .code-clear:hover { background: var(--warn); color: #141414; }
+.code-bar.code-red .code-clear { border-color: var(--danger); color: #ff8d86; }
+.code-bar.code-red .code-clear:hover { background: var(--danger); color: #fff; }
+
+/* Topbar raise button + popover. */
+.code-wrap { position: relative; }
+.code-btn { padding: 5px 10px; font-size: 15px; line-height: 1; }
+.code-btn.active.code-yellow {
+  background: var(--warn); border-color: var(--warn); color: #141414;
+}
+.code-btn.active.code-red {
+  background: var(--danger); border-color: var(--danger); color: #fff;
+  animation: code-pulse-btn 1.2s ease-in-out infinite;
+}
+@keyframes code-pulse-btn {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.45); }
+}
+.code-pop {
+  position: absolute; left: 0; top: 100%; margin-top: 6px; z-index: 40;
+  width: 250px; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 12px 32px rgba(0,0,0,0.6); padding: 10px;
+}
+.code-level {
+  flex: 1; font-weight: 800; letter-spacing: 1px; padding: 8px 0;
+  background: transparent; opacity: 0.55;
+}
+.code-level.active { opacity: 1; }
+.code-level.code-yellow { border-color: var(--warn); color: var(--warn); }
+.code-level.code-yellow.active { background: var(--warn); color: #141414; }
+.code-level.code-red { border-color: var(--danger); color: #ff8d86; }
+.code-level.code-red.active { background: var(--danger); color: #fff; }
+.code-send {
+  width: 100%; font-weight: 800; letter-spacing: 0.5px; padding: 9px 0;
+  border-radius: 999px;
+}
+.code-send.code-yellow { background: var(--warn); border-color: var(--warn); color: #141414; }
+.code-send.code-red { background: var(--danger); border-color: var(--danger); color: #fff; }
+.code-send:hover { filter: brightness(1.1); }
+
+/* --- Roster popover ------------------------------------------------------ */
+.roster-wrap { position: relative; }
+.roster-btn {
+  display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px;
+  padding: 5px 12px; background: var(--bg-3);
+}
+.roster-me { font-weight: 700; font-size: 13px; }
+.roster-count { font-size: 11px; color: var(--muted); }
+.roster-pop {
+  position: absolute; right: 0; top: 100%; margin-top: 6px; z-index: 40;
+  width: 240px; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 12px 32px rgba(0,0,0,0.6); padding: 8px;
+}
+.roster-head { padding: 2px 4px 6px; text-transform: uppercase; letter-spacing: 1px; }
+.roster-empty { padding: 6px 4px; }
+.roster-row { display: flex; align-items: center; gap: 8px; padding: 5px 4px; }
+.roster-name { font-weight: 600; }
+.roster-role { color: var(--muted); font-size: 12px; text-transform: capitalize; }
+.roster-foot { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px; text-align: right; }
+
+.badge {
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; padding: 1px 5px;
+  border-radius: 3px; border: 1px solid currentColor;
+}
+.badge-caller { color: var(--accent); }
+.badge-admin { color: var(--warn); }
+
+/* --- Offline banner ------------------------------------------------------ */
+.offline-banner {
+  background: rgba(229,83,75,0.16); color: #f2a29c;
+  border-bottom: 1px solid var(--danger);
+  text-align: center; font-size: 12px; font-weight: 600; padding: 5px; letter-spacing: 0.3px;
+}
+
+/* --- Follow pill (disengaged follower) ---------------------------------- */
+.follow-pill {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60;
+  background: var(--warn); color: #141414; font-weight: 700; font-size: 14px;
+  padding: 11px 20px; border: none; border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+}
+.follow-pill:hover { filter: brightness(1.06); border: none; }
+.follow-pill kbd {
+  background: rgba(0,0,0,0.28); color: #141414; padding: 1px 6px; margin: 0 2px;
+  border-radius: 4px; font-family: var(--mono); font-size: 12px; font-weight: 700;
+}
+/* Admin P-hold caller override — red so it can't be mistaken for the follow pill. */
+.follow-pill.override-pill { background: var(--danger); color: #fff; cursor: default; }
+.follow-pill.override-pill kbd { color: #fff; background: rgba(0,0,0,0.3); }
+
+/* --- Caller line marker (followers) ------------------------------------- */
+.show-line.caller-line { position: relative; }
+.show-line.caller-line::before {
+  content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 3px;
+  background: var(--accent); border-radius: 2px;
+}
+.show-line.caller-line .show-line-main {
+  text-decoration: underline; text-decoration-color: rgba(79,140,255,0.9);
+  text-underline-offset: 4px; text-decoration-thickness: 2px;
+}
+
+/* Read-only roles (viewer/spot): script fills the whole width, no side panel. */
+.show.no-side { grid-template-columns: 1fr; }
+
+/* --- Crew panel (admin, in Settings) ------------------------------------ */
+.crew-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.crew-row { display: flex; align-items: center; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--border); }
+.crew-name { font-weight: 600; }
+.crew-you { color: var(--muted); font-weight: 400; font-size: 12px; }
+.crew-role { color: var(--muted); font-size: 12px; text-transform: capitalize; }
+.crew-qr { border-top: 1px solid var(--border); padding-top: 12px; }
+
+/* --- QR code ------------------------------------------------------------- */
+.qr { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.qr-img { border-radius: 8px; background: #fff; padding: 6px; flex: none; }
+.qr-pending { width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; background: var(--bg-3); }
+.qr-side { min-width: 200px; }
+.qr-url { font-family: var(--mono); font-size: 14px; word-break: break-all; margin-top: 4px; color: var(--accent); }
+
+/* ========================================================================
+   M2 — department cue model (editor + cue sheet)
+   ======================================================================== */
+
+/* Per-department color language, shared by the sheet chips, the filter chips and
+   the editor's department selector: lights = accent-blue, audio = green,
+   spot = amber. `currentColor` on the borders keeps each variant single-source. */
+.dept-lights { color: var(--accent); }
+.dept-audio  { color: var(--accent-2); }
+.dept-spot   { color: var(--warn); }
+
+/* Cue Sheet — department chip (colored pill in the Dept column). */
+.dept-chip {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor;
+}
+.dept-chip.dept-lights { background: rgba(79, 140, 255, 0.12); }
+.dept-chip.dept-audio  { background: rgba(46, 160, 67, 0.12); }
+.dept-chip.dept-spot   { background: rgba(210, 153, 34, 0.12); }
+
+/* Cue Sheet — the "Sends" preview cell (dept-aware). Mono, dimmed, clipped so a
+   long spot instruction / OSC address doesn't blow the column open. */
+.cue-sends {
+  font-family: var(--mono); font-size: 12px;
+  max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Cue Sheet — department filter chips row. Neutral until active; the active dept
+   chip lights in its own color (the "All" chip stays neutral-accented). */
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-chip {
+  font-size: 12px; padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--muted);
+}
+.filter-chip:hover { color: var(--text); }
+.filter-chip.active { color: var(--text); border-color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.filter-chip.active.dept-lights { border-color: var(--accent); background: rgba(79, 140, 255, 0.12); color: var(--text); }
+.filter-chip.active.dept-audio  { border-color: var(--accent-2); background: rgba(46, 160, 67, 0.12); color: var(--text); }
+.filter-chip.active.dept-spot   { border-color: var(--warn); background: rgba(210, 153, 34, 0.12); color: var(--text); }
+.filter-count { font-family: var(--mono); opacity: 0.75; margin-left: 2px; }
+
+/* Cue Editor — department selector (first control). Styled like the fire-mode
+   row, but each button lights in its department color when active so the chosen
+   department is unmistakable. */
+.dept-select { display: flex; gap: 8px; margin-bottom: 12px; }
+.dept-btn {
+  flex: 1; font-weight: 700; color: var(--muted);
+  border: 1px solid var(--border); background: var(--bg-3);
+}
+.dept-btn:hover { color: var(--text); }
+.dept-btn.active.dept-lights { color: #fff; background: var(--accent); border-color: var(--accent); }
+.dept-btn.active.dept-audio  { color: #fff; background: var(--accent-2); border-color: var(--accent-2); }
+.dept-btn.active.dept-spot   { color: #141414; background: var(--warn); border-color: var(--warn); }
+
+/* ========================================================================
+   M2 — show-mode rework (role views, dept lens, spot view)
+   ======================================================================== */
+
+/* Cue pills in the script column, colored by department (dept lens). The
+   `.dept-*` color classes are declared above; here we just wire the pill border
+   to the department color and add a faint dept-tinted fill. */
+.pill.dept-lights, .pill.dept-audio, .pill.dept-spot { border-color: currentColor; }
+.pill.dept-lights { background: rgba(79, 140, 255, 0.10); }
+.pill.dept-audio  { background: rgba(46, 160, 67, 0.10); }
+.pill.dept-spot   { background: rgba(210, 153, 34, 0.10); }
+
+/* Dept lens toggle in the standby header. */
+.lens-toggle {
+  font-size: 11px; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--muted);
+}
+.lens-toggle:hover { color: var(--text); }
+.lens-toggle.on { border-color: var(--accent); color: var(--text); background: rgba(79,140,255,0.12); }
+
+/* Transient toast (fire errors / re-arm confirmation). */
+.show-toast {
+  position: fixed; left: 50%; top: 64px; transform: translateX(-50%); z-index: 70;
+  background: var(--bg-3); border: 1px solid var(--warn); color: var(--text);
+  font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+}
+
+/* Fire log — department tag chip before each entry. */
+.log-dept {
+  flex: none; font-weight: 800; font-size: 10px; letter-spacing: 0.5px;
+  min-width: 34px; text-align: center; padding: 0 4px; border-radius: 3px;
+  border: 1px solid currentColor;
+}
+
+/* Position / nav row block in the side panel. */
+.show-nav { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+
+/* Audio scene list (AudioView, §5.3): every audio stop with fired ✓ / armed ▶. */
+.scene-list { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.scene-list-head { display: flex; align-items: baseline; margin-bottom: 8px; }
+.scene-list-body { max-height: 200px; overflow: auto; }
+.scene-item {
+  display: flex; align-items: baseline; gap: 8px; padding: 4px 6px;
+  border-radius: 6px; font-size: 13px;
+}
+.scene-item-mark { flex: none; width: 14px; text-align: center; color: var(--muted); font-family: var(--mono); }
+.scene-item-name { font-family: var(--mono); font-weight: 700; }
+.scene-item-label { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scene-item.fired { opacity: 0.5; }
+.scene-item.fired .scene-item-mark { color: var(--accent-2); }
+.scene-item.armed { background: rgba(46,160,67,0.12); outline: 1px solid var(--accent-2); outline-offset: -1px; }
+.scene-item.armed .scene-item-mark { color: var(--accent-2); }
+
+/* ========================================================================
+   M2 — SpotView (§5.3): huge, input-less spot instruction screen
+   ======================================================================== */
+.spotview {
+  position: relative;
+  height: 100%; display: flex; flex-direction: column;
+  background: var(--bg); padding: 2vmin; gap: 2vmin;
+  /* Re-anchor inherited text color INSIDE this scope: children without an
+     explicit color (e.g. .spot-label) would otherwise inherit body's color,
+     computed against the dark palette — invisible in light mode. */
+  color: var(--text);
+  transition: box-shadow 0.15s ease;
+}
+/* Light mode (per-device toggle): everything below .spotview reads these
+   variables, so re-scoping them here flips the whole screen. The yellow note /
+   amber warn tones are darkened so they stay readable on white. */
+.spotview.light {
+  --bg: #f2f3f5;
+  --bg-2: #ffffff;
+  --bg-3: #e7e9ed;
+  --border: #c6ccd4;
+  --text: #14181d;
+  --muted: #5a6472;
+  --warn: #9a6700;
+  --note: #7d5c00;
+}
+.spot-theme-toggle {
+  position: absolute; top: 2vmin; right: 2vmin; z-index: 2;
+  font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--bg-2); color: var(--muted);
+  opacity: 0.7;
+}
+.spot-theme-toggle:hover { opacity: 1; color: var(--text); }
+/* In light mode the dark theme's opacity-dimming crushes contrast (gray-on-gray)
+   — keep the NEXT card fully opaque and only lightly dim PREVIOUS. */
+.spotview.light .spot-card.standby { opacity: 1; background: #f9fafb; }
+.spotview.light .spot-instr.muted-card { opacity: 1; }
+.spotview.light .spot-card.prev { opacity: 0.8; }
+/* Green flash on ACTIVE change / spotFlash test — an inset glow around the whole
+   screen so the operator's eye catches the change from across the booth. */
+.spotview.flash { box-shadow: inset 0 0 0 6px var(--accent-2), inset 0 0 60px rgba(46,160,67,0.35); }
+.spot-offline {
+  background: rgba(229,83,75,0.16); color: #f2a29c; border: 1px solid var(--danger);
+  border-radius: 8px; text-align: center; font-size: 14px; font-weight: 700; padding: 6px;
+}
+.spotview.light .spot-offline { color: #9e2b24; }
+.spot-cards { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2vmin; }
+.spot-card {
+  border: 1px solid var(--border); border-radius: 14px; padding: 3vmin;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.spot-card.active { flex: 2 1 0; background: var(--bg-2); border-color: var(--accent-2); }
+.spot-card.standby { flex: 1 1 0; background: var(--bg-2); opacity: 0.85; }
+/* PREVIOUS: a slim, dimmed context strip above the ACTIVE card. Right padding
+   keeps the compact text clear of the floating theme toggle. */
+.spot-card.prev {
+  flex: none; background: var(--bg-2); opacity: 0.55;
+  padding: 1.5vmin clamp(70px, 12vmin, 130px) 1.5vmin 3vmin;
+}
+.spot-card.prev .spot-eyebrow { margin-bottom: 0.5vmin; }
+.spot-compact {
+  font-size: clamp(14px, 2.6vmin, 26px); font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.spot-eyebrow {
+  flex: none; text-transform: uppercase; letter-spacing: 2px;
+  font-size: clamp(12px, 2.2vmin, 20px); font-weight: 800; color: var(--muted); margin-bottom: 1.5vmin;
+}
+.spot-card.active .spot-eyebrow { color: var(--accent-2); }
+.spot-instr { display: flex; flex-direction: column; gap: 1.2vmin; min-height: 0; }
+.spot-instr.muted-card { opacity: 0.9; }
+.spot-target { font-size: clamp(20px, 4vmin, 44px); font-weight: 800; color: var(--warn); }
+.spot-label { font-size: clamp(18px, 3.4vmin, 40px); font-weight: 700; }
+.spot-rows { display: flex; flex-direction: column; gap: 0.8vmin; }
+.spot-row { display: flex; align-items: baseline; gap: 2vmin; }
+.spot-row-k {
+  flex: none; min-width: clamp(90px, 16vmin, 200px);
+  text-transform: uppercase; letter-spacing: 1px;
+  font-size: clamp(13px, 2.2vmin, 22px); font-weight: 700; color: var(--muted);
+}
+.spot-row-v {
+  font-size: clamp(28px, 6vmin, 84px); font-weight: 800; line-height: 1.05;
+  color: var(--text); word-break: break-word;
+}
+.spot-notes {
+  margin-top: 1vmin; color: var(--note); font-weight: 600;
+  font-size: clamp(16px, 2.8vmin, 34px); white-space: pre-wrap;
+}
+.spot-idle { color: var(--muted); font-size: clamp(16px, 3vmin, 32px); }
+/* PAUSE pseudo-cues use the pause/interval amber, distinct from spot targets. */
+.spot-pause { color: var(--warn); }

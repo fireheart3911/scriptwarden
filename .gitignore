@@ -1,0 +1,27 @@
+# Dependencies / build output (rebuild with `bun install` / `bun run build`)
+node_modules
+dist
+
+# The show database — NEVER commit. It contains the production's script text
+# (copyrighted material), crew names, session tokens and join PINs.
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Local DB backups stay on the machine that made them
+dbbackup
+
+# Syncthing conflict copies (this project lives inside a synced folder)
+*.sync-conflict-*
+
+# Environment / OS noise
+.env
+.DS_Store
+Thumbs.db
+
+# other
+ascend.lock
+ascend
+pufferfish.lock
+etc
